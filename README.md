@@ -1,231 +1,260 @@
-# GridEye-Edge-AI-Theft-Detection
-GridEye is an IoT-based Edge-AI system that monitors power quality and detects electricity theft by comparing supply and consumer readings. Using ESP32, PZEM-004T sensors, and Random Forest ML, it classifies normal, partial theft, direct theft, and idle conditions to help reduce power losses and improve distribution monitoring.
-
-
-# GridEye: Edge-AI Real-Time Power Quality Monitoring and Differential Theft Detection Using IoT
+# GridEye: Edge-AI Integrated Real-Time Power Monitoring and Differential Theft Detection
 
 ## 1. Project Overview
 
-GridEye is an Edge-AI and IoT-based electricity monitoring system designed to monitor power quality and identify potential electricity theft. The prototype uses an ESP32, two PZEM-004T v3 energy-monitoring sensors, and a Random Forest machine learning model to classify different operating conditions.
+GridEye is an IoT-based electricity monitoring prototype that integrates an ESP32 microcontroller, dual PZEM-004T v3 energy meters, and a Random Forest machine learning model.
 
-The system processes electrical measurements, classifies configured operating conditions locally on the ESP32, and sends electrical data to ThingSpeak for remote monitoring.
+The system monitors electrical parameters on the supply and consumer sides, calculates differences between the measurements, and classifies configured operating conditions using a model embedded in the ESP32.
+
+The prototype can also send monitoring data to ThingSpeak when Wi-Fi connectivity is available.
 
 ## 2. Problem Statement
 
-Electricity theft and non-technical power losses create financial challenges for electricity distribution companies. Identifying abnormal consumption patterns can help highlight situations that require further investigation.
+Electricity theft and power losses can affect the efficiency and revenue of electricity distribution systems. Continuous monitoring of electrical parameters can help identify unusual differences between supply-side and consumer-side measurements.
 
-GridEye explores an affordable approach using embedded systems, machine learning, and IoT to support electrical monitoring and identify potential theft conditions.
+GridEye explores a low-cost approach that combines electrical measurement, embedded machine learning, and IoT-based monitoring to classify different operating conditions.
 
 ## 3. Objectives
 
-- Monitor electrical parameters in real time.
-- Analyse power, current, and voltage differences.
-- Classify operating conditions using a Random Forest model.
-- Execute the converted model on the ESP32.
-- Send electrical measurements to ThingSpeak.
-- Develop a prototype that can be extended for future distribution-level monitoring.
+- Monitor voltage, current, power, and power factor.
+- Compare supply-side and consumer-side electrical measurements.
+- Calculate differential features for machine learning.
+- Perform Random Forest inference directly on the ESP32.
+- Classify four configured operating conditions.
+- Support cloud-based data logging through ThingSpeak.
+- Explore electrical monitoring that can continue locally without internet connectivity.
 
 ## 4. Key Features
 
-- **Real-time monitoring:** Measures voltage, current, power, and power factor.
-- **Edge-AI classification:** Runs the converted Random Forest model on the ESP32.
-- **Four operating conditions:** Normal Operation, Partial Theft, Direct Theft, and Idle.
-- **Differential analysis:** Uses calculated power, current, and voltage differences as model inputs.
-- **IoT monitoring:** Sends electrical readings to ThingSpeak for visualisation.
-- **Expandable design:** Provides a foundation for future improvements in electricity monitoring.
+- Real-time electrical parameter measurement.
+- Dual PZEM-004T v3 sensor integration.
+- Differential voltage, current, and power calculations.
+- Embedded Random Forest classification.
+- Four operating-condition classes.
+- Optional ThingSpeak cloud monitoring.
+- Local classification without requiring continuous internet connectivity.
 
-## 5. Technology Stack
+## 5. System Architecture
 
-| Technology | Purpose |
+The current prototype uses two PZEM-004T v3 sensors to measure the two sides of an experimental load setup. The ESP32 calculates the input features and executes the embedded Random Forest model.
+
+```mermaid
+flowchart TD
+    A[Supply-Side Test Setup] --> B[PZEM Sensor 1]
+    C[Consumer-Side Test Setup] --> D[PZEM Sensor 2]
+    B --> E[ESP32]
+    D --> E
+    E --> F[Electrical Feature Calculation]
+    F --> G[Embedded Random Forest Model]
+    G --> H[Operating Condition Classification]
+    E -. Wi-Fi when available .-> I[ThingSpeak Cloud]
+    H --> J[Serial Monitor / Local Output]
+```
+
+**Implementation note:** The current prototype uses two 9 W bulbs for experimental testing. Feeder-level deployment, GPS integration, Raspberry Pi processing, and large-scale distribution-network monitoring are potential future enhancements, not part of the current implemented hardware.
+
+## 6. Operating-Condition Classification
+
+The model classifies measurements into four configured conditions:
+
+| Classification | Description |
 |---|---|
-| ESP32 | Embedded processing and Edge-AI execution |
-| PZEM-004T v3 | Electrical parameter measurement |
-| Random Forest | Operating-condition classification |
-| C/C++ | ESP32 firmware and converted model |
-| Python | Model training and evaluation |
-| scikit-learn | Machine learning |
-| pandas and NumPy | Dataset processing |
-| Joblib | Python model serialisation |
-| ThingSpeak | Cloud monitoring and visualisation |
-| Arduino IDE | Firmware development |
+| Direct Theft (Bypass) | Represents the configured bypass condition in the experimental setup. |
+| Idle / Both OFF | Represents the condition where both test loads are switched off. |
+| Normal Operation (Consumer Only) | Represents the configured consumer-only operating condition. |
+| Partial Theft (Both Loads Active) | Represents the configured condition where both test loads are active. |
 
-## 6. System Architecture
+These labels describe the experimental conditions represented in the dataset. A model classification alone does not prove that electricity theft has occurred in a real distribution network.
 
-The prototype follows this workflow:
-
-1. Two PZEM-004T v3 sensors measure electrical parameters in the configured supply-side and consumer-side test arrangements.
-2. The ESP32 collects the sensor readings.
-3. The firmware calculates the required differential features.
-4. The converted Random Forest model processes the 11 input features.
-5. The model classifies the operating condition.
-6. Electrical measurements and derived values are uploaded to ThingSpeak for monitoring.
-
-### Model Input Features
-
-- `V1`, `I1`, `P1`, `PF1`
-- `V2`, `I2`, `P2`, `PF2`
-- `Power_Diff`
-- `Current_Diff`
-- `Voltage_Diff`
-
-The model uses the feature order expected by the deployed implementation.
-
-## 7. Classification Categories
-
-| Category | Description |
-|---|---|
-| Normal Operation | Consumer-only load condition |
-| Partial Theft | Both test loads active under the configured test condition |
-| Direct Theft | Configured bypass/direct-theft test condition |
-| Idle | Both test loads switched off |
-
-These categories represent conditions configured for the prototype. Real-world theft identification requires further validation under diverse field conditions.
-
-## 8. Hardware Requirements
+## 7. Hardware Requirements
 
 - ESP32 development board
-- Two PZEM-004T v3 energy-monitoring modules
-- Suitable electrical test loads, such as the prototype's 9 W bulbs
-- Appropriate wiring and electrical protection
-- Computer for firmware development
+- 2 × PZEM-004T v3 energy measurement modules
+- 2 × 9 W bulbs for experimental testing
+- Suitable wiring and electrical connections
+- Computer for programming and monitoring
 
-**Safety:** Mains-voltage experiments must be performed with appropriate isolation and protection under qualified supervision. Never handle exposed live wiring.
+**Safety:** AC mains wiring must be performed by a qualified person using appropriately rated components and protective equipment. Do not handle exposed live conductors.
 
-## 9. Software Requirements
+## 8. Software and Technologies
 
-- Arduino IDE
-- ESP32 board support package
-- Compatible PZEM-004T library
-- Converted Random Forest C/C++ model header
-- Python 3 for model training and evaluation
+| Component | Technology |
+|---|---|
+| Microcontroller | ESP32 |
+| Firmware | C++ / Arduino IDE |
+| Electrical measurement | PZEM-004T v3 |
+| Machine learning | Random Forest |
+| Model training | Python, scikit-learn |
+| Data processing | pandas, NumPy |
+| Notebook environment | Jupyter Notebook |
+| Cloud monitoring | ThingSpeak |
 
-Python dependencies:
+The ESP32 executes the embedded model using a C/C++ header. The Python training notebook is used for model development and evaluation.
 
-- NumPy
-- pandas
-- scikit-learn
-- Joblib
-
-## 10. Repository Structure
+## 9. Repository Structure
 
 ```text
 GridEye/
+├── dataset/
+│   └── GridEye_combined_clean_dataset.csv
+├── GridEye_ESP32_Retrained_RandomForest/
+│   ├── [Existing ESP32 firmware .ino file]
+│   └── [Existing model header file(s)]
+├── ml_train/
+│   └── [Existing Jupyter Notebook]
+├── docs/
+│   └── Technical_Design_Document.pdf
 ├── README.md
 ├── LICENSE
-├── .gitignore
-├── esp32/
-│   ├── GridEye.ino
-│   └── gridEye_random_forest_model.h
-├── ml/
-│   └── retrain_grideye_model.py
-├── data/
-│   └── GridEye_combined_clean_dataset.csv
-├── docs/
-│   └── TECHNICAL_DESIGN.md
-├── tests/
-└── requirements.txt
+└── .gitignore
 ```
 
-The repository contains the ESP32 firmware, converted Random Forest model, Python training script, and supporting project documentation. The Python `.pkl` model file is not included.
+The bracketed entries are descriptions, not literal filenames. Keep your existing filenames unchanged. Add the `docs/` folder and Technical Design Document when that document is ready. Include `.gitignore` if you have created it.
 
-## 11. Installation and Setup
+## 10. Installation and Setup
 
-### A. ESP32 Firmware
-
-1. Install Arduino IDE and configure ESP32 board support.
-2. Install the required PZEM-004T library.
-3. Place `GridEye.ino` and `gridEye_random_forest_model.h` in the appropriate Arduino sketch directory.
-4. Ensure the sketch folder, `.ino` filename, and model-header `#include` statement match.
-5. Configure the sensor communication pins according to the actual hardware wiring.
-6. Configure Wi-Fi and ThingSpeak credentials locally.
-7. Select the correct ESP32 board and port.
-8. Compile and upload the firmware.
-9. Open Serial Monitor to inspect electrical readings and classification outputs.
-
-### B. Python Model Training
-
-The Python training script is provided separately for model retraining and evaluation.
-
-Install the dependencies:
+### A. Clone the repository
 
 ```bash
-pip install numpy pandas scikit-learn joblib
+git clone https://github.com/sganeshram2006-a11y/GridEye.git
+cd GridEye
 ```
 
-Place `GridEye_combined_clean_dataset.csv` in the working directory expected by the script, then run:
+If your GitHub repository uses a different URL, replace the example above with the actual clone URL.
+
+### B. Set up the Python environment
+
+Install Python and the required packages:
 
 ```bash
-python ml/retrain_grideye_model.py
+pip install pandas numpy scikit-learn matplotlib jupyter
 ```
 
-The script generates a Python `.pkl` model and a text evaluation report locally. The `.pkl` file is not included in this repository. Retraining the Python model does not automatically update the converted model running on the ESP32.
+Open the Jupyter Notebook in `ml_train/` and run the cells to load the dataset, train the classifier, and evaluate its performance.
 
-### C. ThingSpeak Configuration
+Ensure that the notebook references the dataset at:
 
-1. Create a ThingSpeak channel.
-2. Configure its fields to match the measurements uploaded by the firmware.
-3. Set the required channel credentials in your local configuration.
-4. Verify that the readings appear correctly on the dashboard.
+```text
+dataset/GridEye_combined_clean_dataset.csv
+```
 
-**Security:** Never upload Wi-Fi passwords, ThingSpeak write API keys, Firebase credentials, or other private tokens to a public repository.
+### C. Configure the ESP32
 
-## 12. Dataset and Model Evaluation
+1. Install the Arduino IDE and ESP32 board support.
+2. Install the required PZEM and ThingSpeak libraries.
+3. Open the existing `.ino` file in `GridEye_ESP32_Retrained_RandomForest/`.
+4. Ensure that the model header included by the firmware is present in the sketch directory.
+5. Configure Wi-Fi credentials and the ThingSpeak API key locally if cloud logging is required.
+6. Verify the sensor wiring and pin assignments against the firmware.
+7. Select the correct ESP32 board and port, then compile and upload the firmware.
+8. Open the Serial Monitor to observe measurements and classification outputs.
 
-The Python training workflow expects a labelled dataset containing the 11 model features and a target column identifying each operating condition.
+**Security:** Never commit actual Wi-Fi passwords or API keys to a public repository. Use placeholders in shared source code.
 
-The training script uses an 80:20 stratified train-test split and reports:
+### D. Model deployment note
 
-- Held-out test accuracy
-- Precision, recall, and F1-score
-- Confusion matrix
-- Five-fold cross-validation scores
+The Python notebook may generate a `.pkl` model for training or evaluation. The ESP32 does not load this Python model directly; it uses the embedded C/C++ model header.
 
-Evaluation results depend on the dataset quality and experimental conditions. Report the actual measured results alongside the dataset size and testing limitations. No unverified accuracy claim is made here.
+Retraining the notebook does not automatically update the header. A newly trained model must be converted into the appropriate embedded representation and the firmware recompiled before it can be deployed.
 
-## 13. Testing
+## 11. Dataset and Machine Learning
 
-Recommended test cases include:
+The project uses `GridEye_combined_clean_dataset.csv` to train and evaluate the Random Forest classifier.
 
-- Normal consumer-load operation
-- Partial-theft test arrangement
-- Direct-theft/bypass test arrangement
-- Both test loads switched off
-- Invalid or missing sensor readings
-- Wi-Fi disconnection and reconnection
-- Comparison of predicted classes with expected test labels
+The dataset contains 275 samples across four classes:
 
-Record the expected output, observed output, and pass/fail status for each test performed.
+| Class | Samples |
+|---|---:|
+| Normal Operation (Consumer Only) | 100 |
+| Idle / Both OFF | 72 |
+| Direct Theft (Bypass) | 60 |
+| Partial Theft (Both Loads Active) | 43 |
+| **Total** | **275** |
 
-## 14. Expected Outcomes and Impact
+### Input Features
 
-GridEye aims to demonstrate how embedded AI and IoT can support real-time electrical monitoring and identify configured abnormal consumption conditions.
+The classifier uses 11 features:
 
-Potential benefits include improved visibility into electrical operating conditions, support for investigating possible non-technical losses, and a foundation for future electricity distribution monitoring solutions.
+1. Supply-side voltage (`V1`)
+2. Supply-side current (`I1`)
+3. Supply-side power (`P1`)
+4. Supply-side power factor (`PF1`)
+5. Consumer-side voltage (`V2`)
+6. Consumer-side current (`I2`)
+7. Consumer-side power (`P2`)
+8. Consumer-side power factor (`PF2`)
+9. Power difference (`Power_Diff`)
+10. Current difference (`Current_Diff`)
+11. Voltage difference (`Voltage_Diff`)
 
-## 15. Limitations
+The differential features are calculated from the sensor measurements before model inference.
 
-- The current implementation is a controlled prototype, not a validated utility-scale theft detection system.
-- Classification performance depends on the training data and operating conditions.
-- Sensor inaccuracies and changes in electrical loads may affect predictions.
-- Field validation is required before considering deployment in actual distribution networks.
-- GIS-based monitoring, feeder-level deployment, and advanced low-connectivity alerts are future extensions unless implemented separately.
+### Training Methodology
 
-## 16. Future Scope
+The training notebook uses a Random Forest classifier with 100 trees and a fixed random seed. It uses an 80/20 stratified train-test split and five-fold cross-validation on the training portion.
 
-- Expand testing with more load combinations and operating conditions.
-- Improve robustness against sensor errors and communication failures.
-- Develop a more comprehensive monitoring dashboard.
-- Investigate communication technologies for areas with limited internet connectivity.
-- Explore feeder-level monitoring and GIS-based visualisation.
+Model performance should be interpreted in the context of the dataset size, data collection procedure, and possible similarities between samples. Performance on a controlled dataset does not guarantee the same results on an actual electricity distribution network.
+
+## 12. Sample Test Cases
+
+| Test condition | Expected classification |
+|---|---|
+| Both test loads switched off | Idle / Both OFF |
+| Consumer-side load operating in the configured normal setup | Normal Operation (Consumer Only) |
+| Configured bypass test condition | Direct Theft (Bypass) |
+| Both test loads operating in the configured partial-theft setup | Partial Theft (Both Loads Active) |
+
+These are expected classifications for the configured prototype conditions. Verify the actual output for each test case before reporting test results.
+
+## 13. ThingSpeak Integration
+
+When Wi-Fi and ThingSpeak are configured, the ESP32 can upload monitoring data for remote observation.
+
+The configured data fields are:
+
+- `V1`, `I1`, `P1`, `PF1` — supply-side measurements
+- `V2`, `I2`, `P2`, `PF2` — consumer-side measurements
+- `Power_Diff` — power difference
+- `Current_Diff` — current difference
+- `Voltage_Diff` — voltage difference
+
+Cloud monitoring depends on network availability and correct API configuration. Local inference can operate independently of the cloud connection.
+
+## 14. Limitations
+
+- The current implementation is a small-scale experimental prototype.
+- The dataset contains a limited number of samples representing configured test conditions.
+- Similar or repeated samples may affect evaluation results.
+- Real distribution networks involve technical losses, voltage variations, sensor errors, and diverse load conditions that may not be represented by the prototype.
+- Classification outputs should not be treated as conclusive evidence of electricity theft.
+- Cloud monitoring requires suitable network connectivity and API configuration.
+
+## 15. Future Enhancements
+
+- Collect a larger and more diverse dataset under controlled conditions.
+- Evaluate the model on independent measurements not used during training.
+- Improve robustness to sensor errors and load variations.
+- Add alert mechanisms for abnormal electrical measurements.
+- Explore feeder-level monitoring and location-aware reporting.
+- Investigate LoRa or other communication methods for areas with limited internet connectivity.
+- Validate the approach under realistic distribution-system conditions with appropriate safety procedures.
+
+## 16. Technical Documentation
+
+A separate Technical Design Document will describe the detailed hardware design, software workflow, system architecture, model methodology, test procedures, results, limitations, and future enhancements.
+
+Once completed, it will be available in the `docs/` directory.
 
 ## 17. License
 
-This project is shared under the terms specified in the repository's `LICENSE` file. Check third-party library, dataset, and model-conversion tool licences before redistributing their components.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ## 18. Acknowledgements
 
-Developed as an Electrical and Electronics Engineering project exploring embedded systems, machine learning, and IoT for smarter electricity monitoring.
+This project was developed as an academic engineering prototype exploring the integration of electrical measurement, embedded systems, IoT, and machine learning for electricity monitoring.
 
 ---
 
-**Disclaimer:** GridEye is intended for research and educational purposes. Its classifications represent configured prototype test conditions and should not be treated as conclusive proof of electricity theft without independent investigation.
+**Project:** GridEye — Edge-AI Integrated Real-Time Power Monitoring and Differential Theft Detection
+
+**GitHub Repository:** [sganeshram2006-a11y/GridEye](https://github.com/sganeshram2006-a11y/GridEye)
