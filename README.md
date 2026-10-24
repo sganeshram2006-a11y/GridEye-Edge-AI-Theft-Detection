@@ -243,7 +243,7 @@ Cloud monitoring depends on network availability and correct API configuration. 
 
 A separate Technical Design Document will describe the detailed hardware design, software workflow, system architecture, model methodology, test procedures, results, limitations, and future enhancements.
 
-Once completed, it will be available in the `docs/` directory.
+
 
 ## 17. License
 
