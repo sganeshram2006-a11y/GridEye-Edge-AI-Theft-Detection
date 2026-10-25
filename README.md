@@ -109,7 +109,7 @@ GridEye/
 └── .gitignore
 ```
 
-The bracketed entries are descriptions, not literal filenames. Keep your existing filenames unchanged. Add the `docs/` folder and Technical Design Document when that document is ready. Include `.gitignore` if you have created it.
+
 
 ## 10. Installation and Setup
 
@@ -149,7 +149,7 @@ dataset/GridEye_combined_clean_dataset.csv
 7. Select the correct ESP32 board and port, then compile and upload the firmware.
 8. Open the Serial Monitor to observe measurements and classification outputs.
 
-**Security:** Never commit actual Wi-Fi passwords or API keys to a public repository. Use placeholders in shared source code.
+
 
 ### D. Model deployment note
 
